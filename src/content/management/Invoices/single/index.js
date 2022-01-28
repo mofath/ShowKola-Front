@@ -7,7 +7,7 @@ import PageTitleWrapper from 'src/components/PageTitleWrapper';
 import { Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import useRefMounted from 'src/hooks/useRefMounted';
-import axios from 'src/utils/axios';
+import axios from 'src/utils/axiosMock';
 
 import InvoiceBody from './InvoiceBody';
 import PageHeader from './PageHeader';

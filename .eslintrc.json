@@ -9,6 +9,7 @@
     "requireConfigFile": false
   },
   "rules": {
+    "no-unused-vars": "off",
     "no-underscore-dangle": "off",
     "prefer-const": "off",
     "radix": "off",

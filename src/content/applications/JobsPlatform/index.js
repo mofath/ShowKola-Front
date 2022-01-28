@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import { useTranslation } from 'react-i18next';
-import axios from 'src/utils/axios';
+import axios from 'src/utils/axiosMock';
 import MenuTwoToneIcon from '@mui/icons-material/MenuTwoTone';
 
 import useRefMounted from 'src/hooks/useRefMounted';

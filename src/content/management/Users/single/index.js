@@ -7,7 +7,7 @@ import { Box, Tabs, Tab, Grid, styled } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import useRefMounted from 'src/hooks/useRefMounted';
 import { useTranslation } from 'react-i18next';
-import axios from 'src/utils/axios';
+import axios from 'src/utils/axiosMock';
 
 import ProfileCover from './ProfileCover';
 import RecentActivity from './RecentActivity';

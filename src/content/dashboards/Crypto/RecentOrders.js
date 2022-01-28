@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import { Card } from '@mui/material';
-import axios from 'src/utils/axios';
+import axios from 'src/utils/axiosMock';
 import useRefMounted from 'src/hooks/useRefMounted';
 import RecentOrdersTable from './RecentOrdersTable';
 

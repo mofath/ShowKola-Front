@@ -1,5 +1,5 @@
 import { createContext, useEffect, useReducer } from 'react';
-import axios from 'src/utils/axios';
+import axios from 'src/utils/axiosMock';
 import { verify, JWT_SECRET } from 'src/utils/jwt';
 import PropTypes from 'prop-types';
 

@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import _ from 'lodash';
 
-import axios from 'src/utils/axios';
+import axios from 'src/utils/axiosMock';
 
 const initialState = {
   events: [],

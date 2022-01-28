@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'src/utils/axios';
+import axios from 'src/utils/axiosMock';
 
 import { Helmet } from 'react-helmet-async';
 import { Grid } from '@mui/material';

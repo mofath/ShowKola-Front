@@ -5,7 +5,7 @@ import Footer from 'src/components/Footer';
 import Scrollbar from 'src/components/Scrollbar';
 
 import { styled, Box, Grid, IconButton, Drawer, useTheme } from '@mui/material';
-import axios from 'src/utils/axios';
+import axios from 'src/utils/axiosMock';
 import MenuTwoToneIcon from '@mui/icons-material/MenuTwoTone';
 
 import useRefMounted from 'src/hooks/useRefMounted';

@@ -24,8 +24,9 @@ const router = [
     path: 'account',
     children: accountRoutes
   },
+
   {
-    path: '*',
+    path: 'test',
     element: <BaseLayout />,
     children: baseRoutes
   },
@@ -239,7 +240,7 @@ const router = [
   // Extended Sidebar Layout
 
   {
-    path: 'extended-sidebar',
+    path: '*',
     element: (
       <Authenticated>
         <ExtendedSidebarLayout />

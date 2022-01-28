@@ -1,6 +1,6 @@
 import { setHours, setMinutes, subDays, addDays } from 'date-fns';
 import _ from 'lodash';
-import { mock } from 'src/utils/axios';
+import { mock } from 'src/utils/axiosMock';
 import randomId from 'src/utils/randomId';
 
 let events = [

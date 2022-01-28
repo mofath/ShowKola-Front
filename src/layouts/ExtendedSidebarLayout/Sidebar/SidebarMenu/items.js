@@ -84,6 +84,10 @@ const menuItems = [
             badgeTooltip: 'Statistics Dashboard - version 3.0'
           },
           {
+            name: 'Devices',
+            link: 'dashboards/devices'
+          },
+          {
             name: 'Automation',
             link: 'dashboards/automation'
           },

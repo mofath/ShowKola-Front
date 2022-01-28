@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 import _ from 'lodash';
 
-import axios from 'src/utils/axios';
+import axios from 'src/utils/axiosMock';
 import objectArray from 'src/utils/objectArray';
 
 const initialState = {
@@ -60,6 +60,7 @@ const slice = createSlice({
 export const reducer = slice.reducer;
 
 export const getBoard = () => async (dispatch) => {
+  console.log("axios:",axios);
   const response = await axios.get('/api/projects_board/board');
 
   dispatch(slice.actions.getBoard(response.data));

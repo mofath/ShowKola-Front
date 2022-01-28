@@ -1,5 +1,5 @@
 import { subHours, subDays } from 'date-fns';
-import { mock } from 'src/utils/axios';
+import { mock } from 'src/utils/axiosMock';
 
 const tags = [
   {

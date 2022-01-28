@@ -1,4 +1,4 @@
-import { mock } from 'src/utils/axios';
+import { mock } from 'src/utils/axiosMock';
 
 mock.onGet('/api/products/top').reply(() => {
   const products = [

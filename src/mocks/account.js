@@ -1,4 +1,4 @@
-import { mock } from 'src/utils/axios';
+import { mock } from 'src/utils/axiosMock';
 import wait from 'src/utils/wait';
 import { sign, decode, JWT_SECRET, JWT_EXPIRES_IN } from 'src/utils/jwt';
 import randomId from 'src/utils/randomId';

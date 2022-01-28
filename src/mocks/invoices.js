@@ -1,4 +1,4 @@
-import { mock } from 'src/utils/axios';
+import { mock } from 'src/utils/axiosMock';
 
 import { subHours } from 'date-fns';
 
