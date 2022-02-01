@@ -22,6 +22,6 @@ axiosInt.interceptors.response.use(
   }
 );
 
-export const mock = new AxiosMockAdapter(axiosInt, { delayResponse: 10000 });
+export const mock = new AxiosMockAdapter(axiosInt, { delayResponse: 1000 });
 
 export default axiosInt;

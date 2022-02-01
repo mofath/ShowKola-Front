@@ -65,6 +65,7 @@ const applyFilters = (devices, filters) => {
 };
 
 const applyPagination = (devices, page, limit) => {
+  console.log("devices", devices)
   return devices.slice(page * limit, page * limit + limit);
 };
 
@@ -141,7 +142,7 @@ const DevicesTable = ({ devices }) => {
   };
 
   const filteredDevices = applyFilters(devices, filters);
-  const paginatedCryptoOrders = applyPagination(
+  const paginatedDevices = applyPagination(
     filteredDevices,
     page,
     limit
@@ -204,7 +205,7 @@ const DevicesTable = ({ devices }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedCryptoOrders.map((device) => {
+            {paginatedDevices.map((device) => {
               const isDeviceSelected = selectedDevices.includes(
                 device.id
               );

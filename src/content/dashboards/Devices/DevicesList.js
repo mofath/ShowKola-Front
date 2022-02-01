@@ -1,33 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import { Card } from '@mui/material';
-import axios from 'src/utils/axios';
 import useRefMounted from 'src/hooks/useRefMounted';
-import DevicesTable from './DevicesTable';
+import DevicesTable from 'src/content/dashboards/Devices/DevicesTable';
+import {useDispatch, useSelector} from "src/store";
+import {getDevices} from "src/slices/devices";
 
 function DevicesList() {
+
+  const dispatch = useDispatch();
+  const {devices}  = useSelector((state) => state);
   const isMountedRef = useRefMounted();
-  const [devices, setDevices] = useState([]);
 
-  const getDevices = useCallback(async () => {
-    try {
-      const response = await axios.get('/api/device');
-
-      if (isMountedRef.current) {
-        setDevices(response.data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }, [isMountedRef]);
+  useEffect(()=>{
+    console.log("devices", devices)
+  },[devices]);
 
   useEffect(() => {
-    getDevices();
-  }, [getDevices]);
+    dispatch(getDevices());
+  }, [dispatch]);
 
   return (
     <Card>
-      <DevicesTable devices={devices}/>
+      <DevicesTable devices={devices.devices}/>
     </Card>
   );
 }

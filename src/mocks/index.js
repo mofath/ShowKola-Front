@@ -9,3 +9,4 @@ import './mailbox';
 import './users';
 import './projects';
 import './invoices';
+import './devices';

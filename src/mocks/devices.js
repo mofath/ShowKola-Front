@@ -44,6 +44,6 @@ mock.onGet('/api/reports/devices').reply(() => {
     return [200, { statistics }];
 });
 
-mock.onGet('/api/devices').reply(() => {
-    return [200, { devices }];
+mock.onGet('/api/device').reply(() => {
+    return [200, devices];
 });
