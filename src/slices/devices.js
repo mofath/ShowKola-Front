@@ -1,5 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
-
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import _ from 'lodash';
 
 import axios from 'src/utils/axiosMock';
@@ -40,7 +39,7 @@ const slice = createSlice({
 
 export const reducer = slice.reducer;
 let response;
-export const getDevices = () => async (dispatch) => {
+export const fetchDevices = () => async (dispatch) => {
   try {
     response = await axios.get('/api/device');
   }

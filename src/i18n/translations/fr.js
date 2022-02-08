@@ -1,4 +1,5 @@
 const frJSON = {
+  'YYYY-MM-DD HH:mm:ss': 'DD/MM/YYYY HH:mm:ss',
   Blueprints: 'Plans',
   'Extended Sidebar': 'Barre latérale étendue',
   'Accent Sidebar': "Barre latérale d'accentuation",

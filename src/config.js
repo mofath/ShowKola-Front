@@ -27,3 +27,7 @@ export const amplifyConfig = {
 export const axiosConfig = {
   baseURL: process.env.REACT_APP_API_BASEURL
 }
+
+export const RtkQueryConfig = {
+  baseUrl: process.env.REACT_APP_API_BASEURL
+}

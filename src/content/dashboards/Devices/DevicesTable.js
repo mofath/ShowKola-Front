@@ -22,9 +22,9 @@ import {
   MenuItem,
   Typography,
   useTheme,
-  CardHeader
+  CardHeader, Skeleton
 } from '@mui/material';
-
+import moment from 'moment';
 import Label from 'src/components/Label';
 import { useTranslation } from 'react-i18next';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
@@ -69,7 +69,7 @@ const applyPagination = (devices, page, limit) => {
   return devices.slice(page * limit, page * limit + limit);
 };
 
-const DevicesTable = ({ devices }) => {
+const DevicesTable = ({ devices, isLoading }) => {
   const { t } = useTranslation();
 
   const [selectedDevices, setSelectedDevices] = useState([]);
@@ -154,6 +154,14 @@ const DevicesTable = ({ devices }) => {
     selectedDevices.length === devices.length;
   const theme = useTheme();
 
+  const displayUtcDate = (date) => {
+    if (moment(date).isAfter(moment().subtract(1, 'hours')))
+      return moment(date).fromNow();
+    if (moment(date).isSame(moment(),"day"))
+      return moment(date,"day");
+    return moment(date).local().format(t('YYYY-MM-DD HH:mm:ss'));
+  }
+
   return (
     <Card>
       {selectedBulkActions && (
@@ -199,103 +207,124 @@ const DevicesTable = ({ devices }) => {
                 />
               </TableCell>
               <TableCell>{t('Device brand')}</TableCell>
-              <TableCell>{t('Device ID')}</TableCell>
               <TableCell>{t('Device IP')}</TableCell>
+              <TableCell>{t('Last connection')}</TableCell>
               <TableCell align="right">{t('Actions')}</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            {paginatedDevices.map((device) => {
-              const isDeviceSelected = selectedDevices.includes(
-                device.id
-              );
-              return (
-                <TableRow
-                  hover
-                  key={device.id}
-                  selected={isDeviceSelected}
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      checked={isDeviceSelected}
-                      onChange={(event) =>
-                        handleSelectOneDevice(event, device.id)
-                      }
-                      value={isDeviceSelected}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {device.brand}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {device.model}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body1"
-                      fontWeight="bold"
-                      color="text.primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {device.id}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                        variant="body1"
-                        fontWeight="bold"
-                        color="text.primary"
-                        gutterBottom
-                        noWrap
-                    >
-                      {device.host}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {device.port}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title={t('Edit Order')} arrow>
-                      <IconButton
-                        sx={{
-                          '&:hover': {
-                            background: theme.colors.primary.lighter
-                          },
-                          color: theme.palette.primary.main
-                        }}
-                        color="inherit"
-                        size="small"
+          {isLoading?
+              (
+                  <TableBody>
+                    {[...Array(limit)].map((e, index) =>
+                        <TableRow key={index}>
+                          <TableCell padding="checkbox">
+                            <Skeleton/>
+                          </TableCell>
+                          <TableCell><Skeleton/></TableCell>
+                          <TableCell><Skeleton/></TableCell>
+                          <TableCell><Skeleton/></TableCell>
+                          <TableCell align="right"><Skeleton/></TableCell>
+                        </TableRow>
+                    )}
+
+                  </TableBody>
+              ):
+              (
+                  <TableBody>
+                {paginatedDevices.map((device) => {
+                  const isDeviceSelected = selectedDevices.includes(
+                      device.id
+                  );
+                  return (
+                      <TableRow
+                          hover
+                          key={device.id}
+                          selected={isDeviceSelected}
                       >
-                        <EditTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t('Delete Order')} arrow>
-                      <IconButton
-                        sx={{
-                          '&:hover': { background: theme.colors.error.lighter },
-                          color: theme.palette.error.main
-                        }}
-                        color="inherit"
-                        size="small"
-                      >
-                        <DeleteTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                              color="primary"
+                              checked={isDeviceSelected}
+                              onChange={(event) =>
+                                  handleSelectOneDevice(event, device.id)
+                              }
+                              value={isDeviceSelected}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                          >
+                            {device.brand}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" noWrap>
+                            {device.model}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                          >
+                            {device.host}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" noWrap>
+                            {device.port}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              color="text.primary"
+                              gutterBottom
+                              noWrap
+                          >
+                            {displayUtcDate(device.lastOnlineStatusTimeStamp)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Tooltip title={t('Edit Order')} arrow>
+                            <IconButton
+                                sx={{
+                                  '&:hover': {
+                                    background: theme.colors.primary.lighter
+                                  },
+                                  color: theme.palette.primary.main
+                                }}
+                                color="inherit"
+                                size="small"
+                            >
+                              <EditTwoToneIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={t('Delete Order')} arrow>
+                            <IconButton
+                                sx={{
+                                  '&:hover': { background: theme.colors.error.lighter },
+                                  color: theme.palette.error.main
+                                }}
+                                color="inherit"
+                                size="small"
+                            >
+                              <DeleteTwoToneIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                  );
+                })}
+              </TableBody>
+              )
+          }
+
         </Table>
       </TableContainer>
       <Box p={2}>
