@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useCallback, useState} from 'react';
 import { format } from 'date-fns';
 import numeral from 'numeral';
 import PropTypes from 'prop-types';
@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from 'src/content/management/Products/BulkActions';
+import {useNavigate} from "react-router-dom";
 
 const getStatusLabel = (deviceStatus) => {
   const map = {
@@ -71,7 +72,7 @@ const applyPagination = (devices, page, limit) => {
 
 const DevicesTable = ({ devices, isLoading }) => {
   const { t } = useTranslation();
-
+  const navigate = useNavigate();
   const [selectedDevices, setSelectedDevices] = useState([]);
   const selectedBulkActions = selectedDevices.length > 0;
   const [page, setPage] = useState(0);
@@ -98,6 +99,8 @@ const DevicesTable = ({ devices, isLoading }) => {
       name: t('Failed')
     }
   ];
+
+  const handleEditClick = useCallback((id) => navigate(`/devices/${id}/edit`, {replace: false}), [navigate]);
 
   const handleStatusChange = (e) => {
     let value = null;
@@ -301,6 +304,7 @@ const DevicesTable = ({ devices, isLoading }) => {
                                 }}
                                 color="inherit"
                                 size="small"
+                                onClick={()=>handleEditClick(device.id)}
                             >
                               <EditTwoToneIcon fontSize="small" />
                             </IconButton>

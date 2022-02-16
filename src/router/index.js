@@ -18,6 +18,7 @@ import managementRoutes from './management';
 import documentationRoutes from './documentation';
 import accountRoutes from './account';
 import baseRoutes from './base';
+import devicesRoutes from "./devices";
 
 const router = [
   {
@@ -250,6 +251,10 @@ const router = [
       {
         path: '/',
         element: <Navigate to="dashboards" replace />
+      },
+      {
+        path: 'devices',
+        children: devicesRoutes
       },
       {
         path: 'dashboards',

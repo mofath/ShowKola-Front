@@ -3,12 +3,15 @@ import {RtkQueryConfig} from "../config";
 
 export const api = createApi({
     baseQuery: fetchBaseQuery(RtkQueryConfig),
-    reducerPath: 'devidesApi',
+    reducerPath: 'devicesApi',
     endpoints: (build) => ({
         getAllDevices: build.query({
             query: () => `/api/device`
         }),
+        getOneDevice: build.query({
+            query : (id) => `/api/device/${id}`
+        }),
     }),
 })
 
-export const { useGetAllDevicesQuery } = api
+export const { useGetAllDevicesQuery, useGetOneDeviceQuery } = api
