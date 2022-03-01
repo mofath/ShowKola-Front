@@ -21,6 +21,8 @@ import {useTranslation} from "react-i18next";
 import {useSnackbar} from "notistack";
 import {useEffect, useState} from "react";
 import {styled} from "@mui/material/styles";
+import { useUpdateDeviceMutation } from 'src/utils/api';
+
 
 const IconButtonError = styled(IconButton)(
     ({ theme }) => `
@@ -38,12 +40,14 @@ const Form = ({data}) => {
     const { t } = useTranslation();
     const { enqueueSnackbar } = useSnackbar();
     const theme = useTheme();
-
     const mobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+    const [
+        updateDevice, { isLoading: isUpdating }] = useUpdateDeviceMutation()
+
     useEffect(()=> {
-        const toto= "INITIALISATION"
-        console.log(data.fetchedData[toto])
+
+        console.log("chargement des données:",data)
     },[data]);
 
 
@@ -93,6 +97,7 @@ const Form = ({data}) => {
 
     const [items] = useState(itemsList);
 
+
     const handleCreateInvoiceSuccess = () => {
         enqueueSnackbar(t('A new invoice has been created successfully'), {
             variant: 'success',
@@ -110,17 +115,15 @@ const Form = ({data}) => {
                 device: data,
                 submit: null
             }}
-            validationSchema={Yup.object().shape({
-                number: Yup.string()
-                    .max(255)
-                    .required(t('The invoice number field is required'))
-            })}
             onSubmit={async (
                 _values,
                 { resetForm, setErrors, setStatus, setSubmitting }
             ) => {
                 try {
-                    console.log(_values);
+                    const {device} = _values;
+                    console.log("toto");
+                    console.log(device);
+                    updateDevice(device);
                     await wait(1000);
                     resetForm();
                     setStatus({ success: true });
@@ -147,38 +150,7 @@ const Form = ({data}) => {
                 <form onSubmit={handleSubmit}>
 
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
-                                <Box pb={1}>
-                                    <b>{t('Brand')}:</b>
-                                </Box>
-                                <TextField
-                                    error={Boolean(touched.brand && errors.brand)}
-                                    fullWidth
-                                    helperText={touched.brand && errors.brand}
-                                    name="device.brand"
-                                    placeholder={t('Brand of the device')}
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.device.brand}
-                                    variant="outlined"
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Box pb={1}>
-                                    <b>{t('Model')}:</b>
-                                </Box>
-                                <TextField
-                                    error={Boolean(touched.model && errors.model)}
-                                    fullWidth
-                                    helperText={touched.model && errors.model}
-                                    name="device.model"
-                                    placeholder={t('Model of the device')}
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.device.model}
-                                    variant="outlined"
-                                />
-                            </Grid>
+
                             <Grid item xs={12} md={6}>
                                 <Box pb={1}>
                                     <b>{t('Host')}:</b>
@@ -235,6 +207,7 @@ const Form = ({data}) => {
                                     <FormGroup>
                                         {Object.entries(values.device.fetchedData).map(([key, value], index) =>
                                             <FormControlLabel
+                                                key = {key}
                                                 control={
                                                     <Checkbox checked={values.device.fetchedData[key]}
                                                               onChange={handleChange}

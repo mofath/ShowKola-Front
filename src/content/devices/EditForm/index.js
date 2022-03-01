@@ -52,14 +52,16 @@ function EditForm() {
     return (
         <>
             <Grid container justifyContent="space-between" alignItems="center">
-                <Grid item>
+                {!isLoading &&
+                    <Grid item>
                     <Typography variant="h3" component="h3" gutterBottom>
-                        {t('Invoices')}
+                        {t('Device')}
                     </Typography>
-                    <Typography variant="subtitle2">
-                        {t('All recent invoices can be found below')}
+                    <Typography variant="subtitle1">
+                        {data.brand} {data.model}
                     </Typography>
                 </Grid>
+                }
             </Grid>
             {!isLoading &&
                 <Form data={data}/>}

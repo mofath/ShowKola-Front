@@ -11,7 +11,14 @@ export const api = createApi({
         getOneDevice: build.query({
             query : (id) => `/api/device/${id}`
         }),
+        updateDevice: build.mutation({
+            query: (device) => ({
+                url: `/api/device/${device.id}`,
+                method: 'PUT',
+                body: device,
+            }),
+        })
     }),
 })
 
-export const { useGetAllDevicesQuery, useGetOneDeviceQuery } = api
+export const { useGetAllDevicesQuery, useGetOneDeviceQuery, useUpdateDeviceMutation } = api
