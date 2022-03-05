@@ -22,6 +22,7 @@ import {useSnackbar} from "notistack";
 import {useEffect, useState} from "react";
 import {styled} from "@mui/material/styles";
 import { useUpdateDeviceMutation } from 'src/utils/api';
+import _ from "lodash";
 
 
 const IconButtonError = styled(IconButton)(
@@ -42,14 +43,12 @@ const Form = ({data}) => {
     const theme = useTheme();
     const mobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    const [
-        updateDevice, { isLoading: isUpdating }] = useUpdateDeviceMutation()
+    const [updateDevice, { isLoading: isUpdating, error }] = useUpdateDeviceMutation()
 
     useEffect(()=> {
 
         console.log("chargement des données:",data)
     },[data]);
-
 
     const members = [
         {
@@ -109,6 +108,16 @@ const Form = ({data}) => {
         });
 
     };
+    const handleUpdateDeviceFailure = () => {
+        enqueueSnackbar(t('An error occured'), {
+            variant: 'error',
+            anchorOrigin: {
+                vertical: 'bottom',
+                horizontal: 'center'
+            },
+            TransitionComponent: Zoom
+        });
+    }
     return(
         <Formik
             initialValues={{
@@ -117,22 +126,29 @@ const Form = ({data}) => {
             }}
             onSubmit={async (
                 _values,
-                { resetForm, setErrors, setStatus, setSubmitting }
+                { resetForm, setErrors, setStatus, setSubmitting, errors }
             ) => {
                 try {
                     const {device} = _values;
-                    console.log("toto");
-                    console.log(device);
-                    updateDevice(device);
+                    await updateDevice(device).unwrap();
                     await wait(1000);
                     resetForm();
                     setStatus({ success: true });
                     setSubmitting(false);
                     handleCreateInvoiceSuccess();
                 } catch (err) {
-                    console.error(err);
+                    const {status} = err.data;
+                    if (status === 400){
+                        const {errors} = err.data;
+                        // On adapte le format des errors pour Formik
+                        const formikErrors = _.mapValues(_.mapKeys(errors, (v,k)=>_.camelCase(k)),(x) => x[0]);
+                        setErrors({ device: formikErrors});
+
+                    }
+                    else
+                        handleUpdateDeviceFailure();
+
                     setStatus({ success: false });
-                    setErrors({ submit: err.message });
                     setSubmitting(false);
                 }
             }}
@@ -173,9 +189,9 @@ const Form = ({data}) => {
                                 </Box>
                                 <TextField
                                     inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                                    error={Boolean(touched.port && errors.port)}
+                                    error={Boolean(touched.device && touched.device.port && errors.device && errors.device.port)}
                                     fullWidth
-                                    helperText={touched.port && errors.port}
+                                    helperText={touched.device && touched.device.port && errors.device && errors.device.port}
                                     name="device.port"
                                     placeholder={t('Port of the device')}
                                     onBlur={handleBlur}
@@ -188,18 +204,7 @@ const Form = ({data}) => {
                                 <Box pb={1}>
                                     <b>{t('Watch device')}:</b>
                                 </Box>
-                                <TextField
-                                    inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                                    error={Boolean(touched.port && errors.port)}
-                                    fullWidth
-                                    helperText={touched.port && errors.port}
-                                    name="device.port"
-                                    placeholder={t('Port of the device')}
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.device.port}
-                                    variant="outlined"
-                                />
+
                             </Grid>
                             <Grid>
                                 <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
