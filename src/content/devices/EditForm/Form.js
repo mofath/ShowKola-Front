@@ -1,28 +1,21 @@
 import * as Yup from "yup";
 import wait from 'src/utils/wait';
 import {
-    Autocomplete,
-    Avatar,
-    Box, Button, Checkbox,
+    Box, Button, Card, CardActions, CardContent, CardHeader,
     Chip, CircularProgress,
-    DialogContent, FormControl, FormControlLabel, FormGroup, FormHelperText, FormLabel,
-    Grid, IconButton, lighten,
-    Table, TableBody, TableCell,
-    TableContainer, TableFooter,
-    TableHead, TableRow,
-    TextField, Tooltip, Typography, useMediaQuery, useTheme, Zoom
+    FormControl, FormGroup, FormHelperText,
+    Grid, IconButton, lighten, Stack,
+    TextField, useMediaQuery, useTheme, Zoom
 } from "@mui/material";
-import DatePicker from "@mui/lab/DatePicker";
-import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
-import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
-import numeral from "numeral";
-import {FieldArray, Formik} from "formik";
+import {Formik} from "formik";
 import {useTranslation} from "react-i18next";
 import {useSnackbar} from "notistack";
 import {useEffect, useState} from "react";
 import {styled} from "@mui/material/styles";
 import { useUpdateDeviceMutation } from 'src/utils/api';
 import _ from "lodash";
+import EditIcon from '@mui/icons-material/Edit';
+import {useNavigate} from "react-router-dom";
 
 
 const IconButtonError = styled(IconButton)(
@@ -42,7 +35,7 @@ const Form = ({data}) => {
     const { enqueueSnackbar } = useSnackbar();
     const theme = useTheme();
     const mobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+    const navigate = useNavigate();
     const [updateDevice, { isLoading: isUpdating, error }] = useUpdateDeviceMutation()
 
     useEffect(()=> {
@@ -50,55 +43,10 @@ const Form = ({data}) => {
         console.log("chargement des données:",data)
     },[data]);
 
-    const members = [
-        {
-            avatar: '/static/images/avatars/1.jpg',
-            name: 'Maren Lipshutz'
-        },
-        {
-            avatar: '/static/images/avatars/2.jpg',
-            name: 'Zain Vetrovs'
-        },
-        {
-            avatar: '/static/images/avatars/3.jpg',
-            name: 'Hanna Siphron'
-        },
-        {
-            avatar: '/static/images/avatars/4.jpg',
-            name: 'Cristofer Aminoff'
-        },
-        {
-            avatar: '/static/images/avatars/5.jpg',
-            name: 'Maria Calzoni'
-        }
-    ];
-    const itemsList = [
-        {
-            id: 1,
-            name: 'Design services for March',
-            quantity: 1,
-            price: 8945,
-            currency: '$'
-        },
-        {
-            id: 2,
-            name: 'Website migration services',
-            quantity: 3,
-            price: 2367,
-            currency: '$'
-        }
-    ];
-
-
-
-    const [value, setValue] = useState(null);
-    const [value1, setValue1] = useState(null);
-
-    const [items] = useState(itemsList);
 
 
     const handleCreateInvoiceSuccess = () => {
-        enqueueSnackbar(t('A new invoice has been created successfully'), {
+        enqueueSnackbar(t('Device successfully updated'), {
             variant: 'success',
             anchorOrigin: {
                 vertical: 'top',
@@ -108,8 +56,8 @@ const Form = ({data}) => {
         });
 
     };
-    const handleUpdateDeviceFailure = () => {
-        enqueueSnackbar(t('An error occured'), {
+    const handleUpdateDeviceFailure = (message) => {
+        enqueueSnackbar(message, {
             variant: 'error',
             anchorOrigin: {
                 vertical: 'bottom',
@@ -120,22 +68,21 @@ const Form = ({data}) => {
     }
     return(
         <Formik
-            initialValues={{
-                device: data,
-                submit: null
-            }}
+            initialValues={data}
             onSubmit={async (
                 _values,
                 { resetForm, setErrors, setStatus, setSubmitting, errors }
             ) => {
                 try {
-                    const {device} = _values;
+                    console.log("submitting...")
+                    const device = _values;
                     await updateDevice(device).unwrap();
                     await wait(1000);
                     resetForm();
                     setStatus({ success: true });
                     setSubmitting(false);
                     handleCreateInvoiceSuccess();
+                    navigate("/dashboards/devices");
                 } catch (err) {
                     const {status} = err.data;
                     if (status === 400){
@@ -143,11 +90,12 @@ const Form = ({data}) => {
                         // On adapte le format des errors pour Formik
                         const formikErrors = _.mapValues(_.mapKeys(errors, (v,k)=>_.camelCase(k)),(x) => x[0]);
                         setErrors({ device: formikErrors});
-
+                    }
+                    else if (status === 401){
+                        handleUpdateDeviceFailure(t("Operation not allowed"));
                     }
                     else
-                        handleUpdateDeviceFailure();
-
+                        handleUpdateDeviceFailure(t("An error occured"));
                     setStatus({ success: false });
                     setSubmitting(false);
                 }
@@ -161,103 +109,153 @@ const Form = ({data}) => {
                   isSubmitting,
                   touched,
                   values,
-                  setFieldValue
+                  setFieldValue,
+                  resetForm
               }) => (
                 <form onSubmit={handleSubmit}>
-
-                        <Grid container spacing={3}>
-
-                            <Grid item xs={12} md={6}>
-                                <Box pb={1}>
-                                    <b>{t('Host')}:</b>
-                                </Box>
-                                <TextField
-                                    error={Boolean(touched.host && errors.host)}
-                                    fullWidth
-                                    helperText={touched.host && errors.host}
-                                    name="device.host"
-                                    placeholder={t('Host of the device')}
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.device.host}
-                                    variant="outlined"
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Box pb={1}>
-                                    <b>{t('Port')}:</b>
-                                </Box>
-                                <TextField
-                                    inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                                    error={Boolean(touched.device && touched.device.port && errors.device && errors.device.port)}
-                                    fullWidth
-                                    helperText={touched.device && touched.device.port && errors.device && errors.device.port}
-                                    name="device.port"
-                                    placeholder={t('Port of the device')}
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.device.port}
-                                    variant="outlined"
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Box pb={1}>
-                                    <b>{t('Watch device')}:</b>
-                                </Box>
-
-                            </Grid>
-                            <Grid>
-                                <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
-                                    <FormLabel component="legend">{t("Tracking commands")}</FormLabel>
-                                    <FormGroup>
-                                        {Object.entries(values.device.fetchedData).map(([key, value], index) =>
-                                            <FormControlLabel
-                                                key = {key}
-                                                control={
-                                                    <Checkbox checked={values.device.fetchedData[key]}
-                                                              onChange={handleChange}
-                                                              onClick={()=>console.log(values.device.fetchedData[key])}
-                                                              name={`device.fetchedData.${key}`}/>
-                                                }
-                                                label={key}
-                                            />
-                                        )}
-
-                                        </FormGroup>
-                                        <FormHelperText>{touched.fetchedData && errors.fetchedData}</FormHelperText>
-                                    </FormControl>
-                            </Grid>
-                        </Grid>
-
-                    <Box
-                        sx={{
-                            display: { xs: 'block', sm: 'flex' },
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            p: 3
-                        }}
-                    >
-                        <Box>
-                            <Button fullWidth={mobile} variant="outlined">
-                                {t('Preview invoice')}
-                            </Button>
-                        </Box>
-                        <Box>
-                            <Button
-                                fullWidth={mobile}
-                                type="submit"
-                                startIcon={
-                                    isSubmitting ? <CircularProgress size="1rem" /> : null
-                                }
-                                disabled={Boolean(errors.submit) || isSubmitting}
-                                variant="contained"
-                                size="large"
-                            >
-                                {t('Apply changes')}
-                            </Button>
-                        </Box>
-                    </Box>
+                    <Card>
+                      <CardHeader
+                          avatar={<EditIcon/>}
+                        title={values.brand}
+                        subheader={values.model}
+                      />
+                      <CardContent>
+                          <Grid container spacing={3}>
+                              <Grid item xs={12} md={6} lg={4}>
+                                  <Box pb={1}>
+                                      <b>{t('Host')}:</b>
+                                  </Box>
+                                  <TextField
+                                      error={Boolean(touched.host && errors.host)}
+                                      fullWidth
+                                      helperText={touched.host && errors.host}
+                                      name="host"
+                                      placeholder={t('Host of the device')}
+                                      onBlur={handleBlur}
+                                      onChange={handleChange}
+                                      value={values.host || undefined}
+                                      variant="outlined"
+                                  />
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4}>
+                                  <Box pb={1}>
+                                      <b>{t('Port')}:</b>
+                                  </Box>
+                                  <TextField
+                                      inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                                      error={Boolean(touched.port && errors.port)}
+                                      fullWidth
+                                      helperText={touched.port && errors.port}
+                                      name="port"
+                                      placeholder={t('Port of the device')}
+                                      onBlur={handleBlur}
+                                      onChange={handleChange}
+                                      value={values.port || undefined}
+                                      variant="outlined"
+                                  />
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4}>
+                                  <Box pb={1}>
+                                      <b>{t('Password')}:</b>
+                                  </Box>
+                                  <TextField
+                                      error={Boolean(touched.password && errors.password)}
+                                      fullWidth
+                                      helperText={touched.password && errors.password}
+                                      name="password"
+                                      placeholder={t('Password of the device')}
+                                      onBlur={handleBlur}
+                                      onChange={handleChange}
+                                      value={values.password || undefined}
+                                      variant="outlined"
+                                  />
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4}>
+                                  <Box pb={1}>
+                                      <b>{t('Serial number')}:</b>
+                                  </Box>
+                                  <TextField
+                                      error={Boolean(touched.vintSerial && errors.vintSerial)}
+                                      fullWidth
+                                      helperText={touched.vintSerial && errors.vintSerial}
+                                      name="password"
+                                      placeholder={t('Serial number of the device')}
+                                      onBlur={handleBlur}
+                                      onChange={handleChange}
+                                      value={values.vintSerial || undefined}
+                                      variant="outlined"
+                                  />
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4}>
+                                  <Box pb={1}>
+                                      <b>{t('Interval')}:</b>
+                                  </Box>
+                                  <TextField
+                                      error={Boolean(touched.interval && errors.interval)}
+                                      fullWidth
+                                      helperText={touched.interval && errors.interval}
+                                      name="interval"
+                                      placeholder={t('Fetching interval')}
+                                      onBlur={handleBlur}
+                                      onChange={handleChange}
+                                      value={values.interval || undefined}
+                                      variant="outlined"
+                                  />
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4}>
+                                  <Box pb={1}>
+                                      <b>{t('Metrics')}:</b>
+                                  </Box>
+                                  <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
+                                      <FormGroup>
+                                          <Stack spacing={1}>
+                                              {Object.entries(values.fetchedData).map(([key, value], index) =>
+                                                  <Chip
+                                                      key = {key}
+                                                      name={`fetchedData.${key}`}
+                                                      label={key}
+                                                      onClick={()=>{setFieldValue(`fetchedData.${key}`,!values.fetchedData[key])}}
+                                                      variant={values.fetchedData[key]?"filled":"outlined"}
+                                                      color="primary"
+                                                      size="small"
+                                                  />
+                                              )}
+                                          </Stack>
+                                      </FormGroup>
+                                      <FormHelperText>{touched.fetchedData && errors.fetchedData}</FormHelperText>
+                                  </FormControl>
+                              </Grid>
+                          </Grid>
+                      </CardContent>
+                      <CardActions>
+                          <Button
+                            fullWidth={mobile}
+                            disabled={isSubmitting}
+                            variant="outlined"
+                            size="large"
+                            onClick={()=>{
+                                resetForm();
+                                navigate("/dashboards/devices");
+                            }}
+                          >
+                              {t('Cancel')}
+                          </Button>
+                          <Button
+                              fullWidth={mobile}
+                              type="submit"
+                              startIcon={
+                                  isSubmitting ? <CircularProgress size="1rem" /> : null
+                              }
+                              disabled={Boolean(errors.submit) || isSubmitting}
+                              variant="contained"
+                              size="large"
+                          >
+                              {t('Apply changes')}
+                          </Button>
+                      </CardActions>
+                  </Card>
                 </form>
+
             )}
         </Formik>
     )
