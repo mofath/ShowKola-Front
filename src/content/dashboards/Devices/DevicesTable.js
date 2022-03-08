@@ -22,7 +22,7 @@ import {
   MenuItem,
   Typography,
   useTheme,
-  CardHeader, Skeleton
+  CardHeader, Skeleton, Switch, Zoom
 } from '@mui/material';
 import moment from 'moment';
 import Label from 'src/components/Label';
@@ -31,6 +31,8 @@ import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BulkActions from 'src/content/management/Products/BulkActions';
 import {useNavigate} from "react-router-dom";
+import {usePatchDeviceMutation} from "src/utils/api";
+import {useSnackbar} from "notistack";
 
 const getStatusLabel = (deviceStatus) => {
   const map = {
@@ -66,7 +68,6 @@ const applyFilters = (devices, filters) => {
 };
 
 const applyPagination = (devices, page, limit) => {
-  console.log("devices", devices)
   return devices.slice(page * limit, page * limit + limit);
 };
 
@@ -74,12 +75,14 @@ const DevicesTable = ({ devices, isLoading }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedDevices, setSelectedDevices] = useState([]);
+  const [patchDevice, result] = usePatchDeviceMutation();
   const selectedBulkActions = selectedDevices.length > 0;
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(5);
   const [filters, setFilters] = useState({
     status: null
   });
+  const { enqueueSnackbar } = useSnackbar();
 
   const statusOptions = [
     {
@@ -101,6 +104,17 @@ const DevicesTable = ({ devices, isLoading }) => {
   ];
 
   const handleEditClick = useCallback((id) => navigate(`/devices/${id}/edit`, {replace: false}), [navigate]);
+
+  const handleUpdateDeviceFailure = (message) => {
+    enqueueSnackbar(message, {
+      variant: 'error',
+      anchorOrigin: {
+        vertical: 'bottom',
+        horizontal: 'center'
+      },
+      TransitionComponent: Zoom
+    });
+  }
 
   const handleStatusChange = (e) => {
     let value = null;
@@ -135,6 +149,17 @@ const DevicesTable = ({ devices, isLoading }) => {
       );
     }
   };
+
+  const handleDeviceWatchValueChanged = (event, device) => {
+    console.log(event.target.checked, device.id);
+    const body = [{
+      op: "replace",
+      path: "/watch",
+      value: event.target.checked
+    }]
+    patchDevice({device, body}).unwrap()
+        .catch(rejected => handleUpdateDeviceFailure("An error occured"));
+  }
 
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
@@ -212,6 +237,7 @@ const DevicesTable = ({ devices, isLoading }) => {
               <TableCell>{t('Device brand')}</TableCell>
               <TableCell>{t('Device IP')}</TableCell>
               <TableCell>{t('Last connection')}</TableCell>
+              <TableCell>{t('Monitor')}</TableCell>
               <TableCell align="right">{t('Actions')}</TableCell>
             </TableRow>
           </TableHead>
@@ -223,6 +249,7 @@ const DevicesTable = ({ devices, isLoading }) => {
                           <TableCell padding="checkbox">
                             <Skeleton/>
                           </TableCell>
+                          <TableCell><Skeleton/></TableCell>
                           <TableCell><Skeleton/></TableCell>
                           <TableCell><Skeleton/></TableCell>
                           <TableCell><Skeleton/></TableCell>
@@ -292,6 +319,12 @@ const DevicesTable = ({ devices, isLoading }) => {
                           >
                             {displayUtcDate(device.lastOnlineStatusTimeStamp)}
                           </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                              checked={device.watch}
+                              onChange={(event)=>handleDeviceWatchValueChanged(event, device)}
+                          />
                         </TableCell>
                         <TableCell align="right">
                           <Tooltip title={t('Edit Order')} arrow>
