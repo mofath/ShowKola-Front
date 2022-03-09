@@ -209,7 +209,7 @@ const Form = ({data}) => {
                                   <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
                                       <FormGroup>
                                           <Stack spacing={1}>
-                                              {Object.entries(values.fetchedData).map(([key, value], index) =>
+                                              {values.fetchedData && Object.entries(values.fetchedData).map(([key, value], index) =>
                                                   <Chip
                                                       key = {key}
                                                       name={`fetchedData.${key}`}
