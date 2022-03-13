@@ -183,6 +183,8 @@ const DevicesTable = ({ devices, isLoading }) => {
   const theme = useTheme();
 
   const displayUtcDate = (date) => {
+    if (date === null)
+      return t('Never')
     if (moment(date).isAfter(moment().subtract(1, 'hours')))
       return moment(date).fromNow();
     if (moment(date).isSame(moment(),"day"))
