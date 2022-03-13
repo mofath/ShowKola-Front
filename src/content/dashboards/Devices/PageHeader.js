@@ -6,14 +6,14 @@ import {
   alpha,
   lighten,
   Avatar,
-  MenuItem,
-  Menu,
   styled
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import DocumentScannerTwoToneIcon from '@mui/icons-material/DocumentScannerTwoTone';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import KeyboardArrowDownTwoToneIcon from '@mui/icons-material/KeyboardArrowDownTwoTone';
 import AddAlertTwoToneIcon from '@mui/icons-material/AddAlertTwoTone';
+import {useNavigate} from "react-router-dom";
 
 const AvatarPageTitle = styled(Avatar)(
   ({ theme }) => `
@@ -42,6 +42,8 @@ const AvatarPageTitle = styled(Avatar)(
 
 function PageHeader() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
 
   const periods = [
     {
@@ -87,46 +89,8 @@ function PageHeader() {
         </Box>
       </Box>
       <Box mt={{ xs: 3, md: 0 }}>
-        <Button
-          variant="outlined"
-          ref={actionRef1}
-          onClick={() => setOpenMenuPeriod(true)}
-          sx={{
-            mr: 1
-          }}
-          endIcon={<KeyboardArrowDownTwoToneIcon fontSize="small" />}
-        >
-          {period}
-        </Button>
-        <Menu
-          disableScrollLock
-          anchorEl={actionRef1.current}
-          onClose={() => setOpenMenuPeriod(false)}
-          open={openPeriod}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right'
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right'
-          }}
-        >
-          {periods.map((_period) => (
-            <MenuItem
-              key={_period.value}
-              onClick={() => {
-                setPeriod(_period.text);
-                setOpenMenuPeriod(false);
-              }}
-            >
-              {_period.text}
-            </MenuItem>
-          ))}
-        </Menu>
-
-        <Button variant="contained" startIcon={<DocumentScannerTwoToneIcon />}>
-          {t('Export')}
+        <Button onClick={()=>{navigate("/devices/create");}} variant="contained" startIcon={<AddCircleIcon />}>
+          {t('Add Device')}
         </Button>
       </Box>
     </Box>

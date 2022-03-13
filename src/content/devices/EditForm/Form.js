@@ -30,6 +30,77 @@ const IconButtonError = styled(IconButton)(
 `
 );
 
+const jsonSchema = {
+    type: "object",
+    properties: {
+        id: {
+            type: "string",
+            nullable: true
+        },
+        brand: {
+            type: "string",
+            nullable: true
+        },
+        model: {
+            type: "string",
+            nullable: true
+        },
+        host: {
+            pattern: "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
+            type: "string",
+            nullable: true
+        },
+        port: {
+            maximum: 65535,
+            minimum: 0,
+            type: "integer",
+            format: "int32"
+        },
+        password: {
+            type: "string",
+            nullable: true
+        },
+        hubPort: {
+            type: "integer",
+            format: "int32"
+        },
+        vintSerial: {
+            type: "integer",
+            format: "int32"
+        },
+        interval: {
+            type: "integer",
+            format: "int32"
+        },
+        watch: {
+            type: "boolean"
+        },
+        fetchedData: {
+            type: "object",
+            additionalProperties: {
+                type: "boolean"
+            },
+            nullable: true
+        }
+    },
+    additionalProperties: false
+};
+
+const config = {
+    // for error messages...
+    errMessages: {
+        port: {
+            required: "A person must have an age",
+        },
+        email: {
+            format: "Must be a v4 ip",
+        },
+    },
+};
+
+// const yupSchema = buildSchema(jsonSchema, { types });
+// const yupSchema = buildYup(schema, config);
+
 const Form = ({data}) => {
     const { t } = useTranslation();
     const { enqueueSnackbar } = useSnackbar();
@@ -178,7 +249,7 @@ const Form = ({data}) => {
                                       error={Boolean(touched.vintSerial && errors.vintSerial)}
                                       fullWidth
                                       helperText={touched.vintSerial && errors.vintSerial}
-                                      name="password"
+                                      name="vintSerial"
                                       placeholder={t('Serial number of the device')}
                                       onBlur={handleBlur}
                                       onChange={handleChange}

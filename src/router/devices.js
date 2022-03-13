@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 
 import SuspenseLoader from 'src/components/SuspenseLoader';
 import EditForm from "../content/devices/EditForm";
+import CreateForm from "../content/devices/CreateForm";
 
 const Loader = (Component) => (props) =>
   (
@@ -48,6 +49,10 @@ const devicesRoutes = [
   {
     path: '/',
     element: <Navigate to="devices" replace />
+  },
+  {
+    path: '/create',
+    element: <CreateForm/>
   },
   {
     path: '/:id',
