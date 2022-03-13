@@ -6,7 +6,7 @@ import {RtkQueryConfig} from "../config";
 export const api = createApi({
     baseQuery: fetchBaseQuery(RtkQueryConfig),
     reducerPath: 'devicesApi',
-    tagTypes: ['Device', 'selectedDevice'],
+    tagTypes: ['Device', 'selectedDevice','Models'],
     endpoints: (build) => ({
         getAllDevices: build.query({
             query: () => `/api/device`,
@@ -15,9 +15,21 @@ export const api = createApi({
                     ? [...result.map(({ id }) => ({ type: 'Device', id })), 'Device']
                     : ['Device']
         }),
+        getModels: build.query({
+            query: () => `/api/device/models`,
+            providesTags: ['Models'],
+        }),
         getOneDevice: build.query({
             query : (id) => `/api/device/${id}`,
             providesTags: ['selectedDevice']
+        }),
+        createDevice: build.mutation({
+            query: (device) => ({
+                url: `/api/device`,
+                method: 'POST',
+                body: device,
+            }),
+            invalidatesTags: (result, error, arg) => [{ type: 'Device', id: arg.id },'selectedDevice'],
         }),
         updateDevice: build.mutation({
             query: (device) => ({
@@ -25,7 +37,7 @@ export const api = createApi({
                 method: 'PUT',
                 body: device,
             }),
-            invalidatesTags: (result, error, arg) => [{ type: 'Device', id: arg.id },'selectedDevice'],
+            invalidatesTags: ['Device']
         }),
         patchDevice: build.mutation({
             query: (payload) => ({
@@ -34,7 +46,7 @@ export const api = createApi({
                 body: payload.body
             }),
             invalidatesTags: (result, error, arg) => [{ type: 'Device', id: arg.id }],
-            async onQueryStarted({device, body},{dispatch,getState, extra, requestId, queryFulfilled}){
+            async onQueryStarted({device, body},{dispatch, queryFulfilled}){
                 const patchResult = dispatch(
                     api.util.updateQueryData('getAllDevices',undefined, (draft) => {
                         // Modifier l'item dans la liste générale
@@ -50,4 +62,9 @@ export const api = createApi({
     }),
 })
 
-export const { useGetAllDevicesQuery, useGetOneDeviceQuery, useUpdateDeviceMutation, usePatchDeviceMutation } = api
+export const { useGetAllDevicesQuery,
+    useGetOneDeviceQuery,
+    useCreateDeviceMutation,
+    useUpdateDeviceMutation,
+    usePatchDeviceMutation,
+    useGetModelsQuery } = api

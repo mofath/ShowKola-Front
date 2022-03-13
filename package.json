@@ -69,6 +69,7 @@
     "redux": "4.1.2",
     "redux-devtools-extension": "2.13.9",
     "redux-thunk": "2.4.0",
+    "schema-to-yup": "^1.11.5",
     "stylis": "4.0.10",
     "stylis-plugin-rtl": "2.1.1",
     "swiper": "6.8.4",
