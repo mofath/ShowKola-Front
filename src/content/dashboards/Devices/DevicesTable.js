@@ -1,4 +1,4 @@
-import {useCallback, useState} from 'react';
+import {forwardRef, useCallback, useEffect, useState} from 'react';
 import { format } from 'date-fns';
 import numeral from 'numeral';
 import PropTypes from 'prop-types';
@@ -22,17 +22,55 @@ import {
   MenuItem,
   Typography,
   useTheme,
-  CardHeader, Skeleton, Switch, Zoom
+  CardHeader, Skeleton, Switch, Zoom, Button, styled, Dialog, Avatar, Slide, Collapse
 } from '@mui/material';
+import { TransitionGroup } from 'react-transition-group';
 import moment from 'moment';
 import Label from 'src/components/Label';
 import { useTranslation } from 'react-i18next';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import BulkActions from 'src/content/management/Products/BulkActions';
+import BulkActions from 'src/content/devices/BulkActions';
 import {useNavigate} from "react-router-dom";
-import {usePatchDeviceMutation} from "src/utils/api";
+import {useDeleteOneDeviceMutation, usePatchDeviceMutation, usePatchDevicesMutation} from "src/utils/api";
 import {useSnackbar} from "notistack";
+import CloseIcon from "@mui/icons-material/Close";
+
+const DialogWrapper = styled(Dialog)(
+    () => `
+      .MuiDialog-paper {
+        overflow: visible;
+      }
+`
+);
+
+const AvatarError = styled(Avatar)(
+    ({ theme }) => `
+      background-color: ${theme.colors.error.lighter};
+      color: ${theme.colors.error.main};
+      width: ${theme.spacing(12)};
+      height: ${theme.spacing(12)};
+
+      .MuiSvgIcon-root {
+        font-size: ${theme.typography.pxToRem(45)};
+      }
+`
+);
+
+const ButtonError = styled(Button)(
+    ({ theme }) => `
+     background: ${theme.colors.error.main};
+     color: ${theme.palette.error.contrastText};
+
+     &:hover {
+        background: ${theme.colors.error.dark};
+     }
+    `
+);
+
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="down" ref={ref} {...props} />;
+});
 
 const getStatusLabel = (deviceStatus) => {
   const map = {
@@ -76,6 +114,8 @@ const DevicesTable = ({ devices, isLoading }) => {
   const navigate = useNavigate();
   const [selectedDevices, setSelectedDevices] = useState([]);
   const [patchDevice, result] = usePatchDeviceMutation();
+  const [patchDevices, bulkPatchresult] = usePatchDevicesMutation();
+  const [deleteOneDevice, deleteOneDeviceResult] = useDeleteOneDeviceMutation();
   const selectedBulkActions = selectedDevices.length > 0;
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(5);
@@ -83,6 +123,8 @@ const DevicesTable = ({ devices, isLoading }) => {
     status: null
   });
   const { enqueueSnackbar } = useSnackbar();
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+  const [devicesToDelete, setDevicesToDelete] = useState([]);
 
   const statusOptions = [
     {
@@ -104,6 +146,83 @@ const DevicesTable = ({ devices, isLoading }) => {
   ];
 
   const handleEditClick = useCallback((id) => navigate(`/devices/${id}/edit`, {replace: false}), [navigate]);
+
+  useEffect(()=>{
+    // Lorsqu'un device est supprimé, on mets à jour la liste des devices selectionnés, pour éventuellement l'enlever
+    selectedDevices.forEach((selectedDevice) =>{
+      if (!devices.some(x => x.id === selectedDevice)){
+        setSelectedDevices((prevSelected) =>
+            prevSelected.filter((id) => id !== selectedDevice)
+        );
+      }
+    })
+  },[devices])
+
+  const handleConfirmDelete = (deviceId) => {
+    setDevicesToDelete([deviceId]);
+    setOpenConfirmDelete(true);
+  };
+
+  const closeConfirmDelete = () => {
+    setDevicesToDelete([]);
+    setOpenConfirmDelete(false);
+  };
+
+  const handleDeleteCompleted = () => {
+
+    if (devicesToDelete.length === 1){
+      deleteOneDevice(devicesToDelete[0]).unwrap()
+          .then(()=>{
+            setOpenConfirmDelete(false);
+            setDevicesToDelete([]);
+
+            enqueueSnackbar(t('Delete action completed successfully'), {
+              variant: 'success',
+              anchorOrigin: {
+                vertical: 'top',
+                horizontal: 'right'
+              },
+              TransitionComponent: Zoom
+            });
+          })
+          .catch(rejected => handleUpdateDeviceFailure("An error occured"));
+    }
+    else if (devicesToDelete.length > 1){
+      const patchOperation = [{
+        op: "replace",
+        path: "/isDeleted",
+        value: true
+      }];
+      const body = devicesToDelete.reduce(
+          (obj, item) => Object.assign(obj, { [item]: patchOperation }), {});
+      console.log(body);
+
+      patchDevices(body).unwrap()
+          .then((response)=>{
+            setOpenConfirmDelete(false);
+            setDevicesToDelete([]);
+            console.log(response);
+            enqueueSnackbar(t('Delete action completed successfully'), {
+              variant: 'success',
+              anchorOrigin: {
+                vertical: 'top',
+                horizontal: 'right'
+              },
+              TransitionComponent: Zoom
+            });
+          })
+          .catch(rejected => handleUpdateDeviceFailure("An error occured"));
+
+    }
+
+
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedBulkActions)
+      setDevicesToDelete(selectedDevices);
+      setOpenConfirmDelete(true);
+  }
 
   const handleUpdateDeviceFailure = (message) => {
     enqueueSnackbar(message, {
@@ -151,7 +270,6 @@ const DevicesTable = ({ devices, isLoading }) => {
   };
 
   const handleDeviceWatchValueChanged = (event, device) => {
-    console.log(event.target.checked, device.id);
     const body = [{
       op: "replace",
       path: "/watch",
@@ -193,10 +311,11 @@ const DevicesTable = ({ devices, isLoading }) => {
   }
 
   return (
-    <Card>
+    <>
+      <Card>
       {selectedBulkActions && (
         <Box flex={1} p={2}>
-          <BulkActions />
+          <BulkActions handleBulkDelete={handleBulkDelete} />
         </Box>
       )}
       {!selectedBulkActions && (
@@ -258,22 +377,22 @@ const DevicesTable = ({ devices, isLoading }) => {
                           <TableCell align="right"><Skeleton/></TableCell>
                         </TableRow>
                     )}
-
                   </TableBody>
               ):
               (
-                  <TableBody>
+                    <TableBody>
                 {paginatedDevices.map((device) => {
                   const isDeviceSelected = selectedDevices.includes(
                       device.id
                   );
                   return (
-                      <TableRow
-                          hover
-                          key={device.id}
-                          selected={isDeviceSelected}
-                      >
-                        <TableCell padding="checkbox">
+
+                        <TableRow
+                            hover
+                            selected={isDeviceSelected}
+                            key={device.id}
+                        >
+                          <TableCell padding="checkbox">
                           <Checkbox
                               color="primary"
                               checked={isDeviceSelected}
@@ -352,15 +471,16 @@ const DevicesTable = ({ devices, isLoading }) => {
                                 }}
                                 color="inherit"
                                 size="small"
+                                onClick={()=>handleConfirmDelete(device.id)}
                             >
                               <DeleteTwoToneIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         </TableCell>
-                      </TableRow>
+                        </TableRow>
                   );
-                })}
-              </TableBody>
+                          })}
+                    </TableBody>
               )
           }
 
@@ -378,6 +498,76 @@ const DevicesTable = ({ devices, isLoading }) => {
         />
       </Box>
     </Card>
+      <DialogWrapper
+          open={openConfirmDelete}
+          maxWidth="sm"
+          fullWidth
+          TransitionComponent={Transition}
+          keepMounted
+          onClose={closeConfirmDelete}
+      >
+        <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            flexDirection="column"
+            p={5}
+        >
+          <AvatarError>
+            <CloseIcon />
+          </AvatarError>
+
+          <Typography
+              align="center"
+              sx={{
+                pt: 4,
+                px: 6
+              }}
+              variant="h3"
+          >
+            {t('Do you really want to delete this invoice')}?
+          </Typography>
+
+          <Typography
+              align="center"
+              sx={{
+                pt: 2,
+                pb: 4,
+                px: 6
+              }}
+              fontWeight="normal"
+              color="text.secondary"
+              variant="h4"
+          >
+            {t("You won't be able to revert after deletion")}
+          </Typography>
+
+          <Box>
+            <Button
+                variant="text"
+                size="large"
+                sx={{
+                  mx: 1
+                }}
+                onClick={closeConfirmDelete}
+            >
+              {t('Cancel')}
+            </Button>
+            <ButtonError
+                onClick={handleDeleteCompleted}
+                size="large"
+                sx={{
+                  mx: 1,
+                  px: 3
+                }}
+                variant="contained"
+            >
+              {t('Delete')}
+            </ButtonError>
+          </Box>
+        </Box>
+      </DialogWrapper>
+    </>
   );
 };
 

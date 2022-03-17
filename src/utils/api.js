@@ -1,5 +1,5 @@
 import {applyPatch} from 'fast-json-patch';
-import _ from 'lodash';
+import {cloneDeep} from 'lodash';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {RtkQueryConfig} from "../config";
 
@@ -23,6 +23,13 @@ export const api = createApi({
             query : (id) => `/api/device/${id}`,
             providesTags: ['selectedDevice']
         }),
+        deleteOneDevice: build.mutation({
+            query: (deviceId) => ({
+                url: `/api/device/${deviceId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, arg) => [{ type: 'Device', id: arg }]
+        }),
         createDevice: build.mutation({
             query: (device) => ({
                 url: `/api/device`,
@@ -39,6 +46,14 @@ export const api = createApi({
             }),
             invalidatesTags: ['Device']
         }),
+        patchDevices: build.mutation({
+            query: (body) => ({
+                url: `/api/device`,
+                method: 'PATCH',
+                body
+            }),
+            invalidatesTags: ['Device']
+        }),
         patchDevice: build.mutation({
             query: (payload) => ({
                 url: `/api/device/${payload.device.id}`,
@@ -50,8 +65,8 @@ export const api = createApi({
                 const patchResult = dispatch(
                     api.util.updateQueryData('getAllDevices',undefined, (draft) => {
                         // Modifier l'item dans la liste générale
-                        let modifiedItem = _.cloneDeep(device);
-                        const jsonPatchResult = applyPatch(modifiedItem, body);
+                        let modifiedItem = cloneDeep(device);
+                        applyPatch(modifiedItem, body);
                         const newList = draft.map(x => x.id === device.id? modifiedItem : x);
                         Object.assign(draft, newList);
                     })
@@ -64,7 +79,9 @@ export const api = createApi({
 
 export const { useGetAllDevicesQuery,
     useGetOneDeviceQuery,
+    useDeleteOneDeviceMutation,
     useCreateDeviceMutation,
     useUpdateDeviceMutation,
+    usePatchDevicesMutation,
     usePatchDeviceMutation,
     useGetModelsQuery } = api

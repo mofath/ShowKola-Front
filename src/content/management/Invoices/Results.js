@@ -508,7 +508,7 @@ const Results = ({ invoices }) => {
             }}
             variant="h3"
           >
-            {t('Do you really want to delete this invoice')}?
+            {t('Do you really want to delete this device')}?
           </Typography>
 
           <Typography
