@@ -10,7 +10,7 @@ export const api = createApi({
     endpoints: (build) => ({
         getAllDevices: build.query({
             query: () => `/api/device`,
-            providesTags: (result, error, arg) =>
+            providesTags: (result) =>
                 result
                     ? [...result.map(({ id }) => ({ type: 'Device', id })), 'Device']
                     : ['Device']
@@ -47,23 +47,45 @@ export const api = createApi({
             invalidatesTags: ['Device']
         }),
         patchDevices: build.mutation({
-            query: (body) => ({
+            query: ({body}) => ({
                 url: `/api/device`,
                 method: 'PATCH',
                 body
             }),
-            invalidatesTags: ['Device']
+            invalidatesTags: ['Device'],
+            async onQueryStarted(payload,{dispatch, queryFulfilled}){
+                const {body, selectedDevices} = payload;
+                const {updateQueryData} = api.util;
+                const patchResult = dispatch(
+                    updateQueryData('getAllDevices',undefined, (draft) => {
+                        // Modifier l'item dans la liste générale
+                        const modifiedDevices = selectedDevices.map((device) => {
+                            let modifiedItem = cloneDeep(device);
+                            applyPatch(modifiedItem, body[device.id]);
+                            return modifiedItem;
+                        });
+                        const newList = draft.map(device => {
+                            const modifiedDevice = modifiedDevices.find(x => device.id === x.id);
+                            return modifiedDevice || device;
+                        });
+                        Object.assign(draft, newList);
+
+                    })
+                )
+                queryFulfilled.catch(patchResult.undo);
+            }
         }),
         patchDevice: build.mutation({
-            query: (payload) => ({
-                url: `/api/device/${payload.device.id}`,
+            query: ({device, body}) => ({
+                url: `/api/device/${device.id}`,
                 method: 'PATCH',
-                body: payload.body
+                body
             }),
             invalidatesTags: (result, error, arg) => [{ type: 'Device', id: arg.id }],
             async onQueryStarted({device, body},{dispatch, queryFulfilled}){
+                const {updateQueryData} = api.util;
                 const patchResult = dispatch(
-                    api.util.updateQueryData('getAllDevices',undefined, (draft) => {
+                    updateQueryData('getAllDevices',undefined, (draft) => {
                         // Modifier l'item dans la liste générale
                         let modifiedItem = cloneDeep(device);
                         applyPatch(modifiedItem, body);

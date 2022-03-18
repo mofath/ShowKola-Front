@@ -1,6 +1,4 @@
 import {forwardRef, useCallback, useEffect, useState} from 'react';
-import { format } from 'date-fns';
-import numeral from 'numeral';
 import PropTypes from 'prop-types';
 import {
   Tooltip,
@@ -22,9 +20,8 @@ import {
   MenuItem,
   Typography,
   useTheme,
-  CardHeader, Skeleton, Switch, Zoom, Button, styled, Dialog, Avatar, Slide, Collapse
+  CardHeader, Skeleton, Switch, Zoom, Button, styled, Dialog, Avatar, Slide
 } from '@mui/material';
-import { TransitionGroup } from 'react-transition-group';
 import moment from 'moment';
 import Label from 'src/components/Label';
 import { useTranslation } from 'react-i18next';
@@ -112,11 +109,11 @@ const applyPagination = (devices, page, limit) => {
 const DevicesTable = ({ devices, isLoading }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [selectedDevices, setSelectedDevices] = useState([]);
-  const [patchDevice, result] = usePatchDeviceMutation();
-  const [patchDevices, bulkPatchresult] = usePatchDevicesMutation();
-  const [deleteOneDevice, deleteOneDeviceResult] = useDeleteOneDeviceMutation();
-  const selectedBulkActions = selectedDevices.length > 0;
+  const [selectedDevicesId, setSelectedDevicesId] = useState([]);
+  const [patchDevice] = usePatchDeviceMutation();
+  const [patchDevices] = usePatchDevicesMutation();
+  const [deleteOneDevice] = useDeleteOneDeviceMutation();
+  const selectedBulkActions = selectedDevicesId.length > 0;
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(5);
   const [filters, setFilters] = useState({
@@ -145,13 +142,15 @@ const DevicesTable = ({ devices, isLoading }) => {
     }
   ];
 
+  const selectedDevices = !isLoading ? devices.filter(x => selectedDevicesId.includes(x.id)) : [];
+
   const handleEditClick = useCallback((id) => navigate(`/devices/${id}/edit`, {replace: false}), [navigate]);
 
   useEffect(()=>{
     // Lorsqu'un device est supprimé, on mets à jour la liste des devices selectionnés, pour éventuellement l'enlever
-    selectedDevices.forEach((selectedDevice) =>{
+    selectedDevicesId.forEach((selectedDevice) =>{
       if (!devices.some(x => x.id === selectedDevice)){
-        setSelectedDevices((prevSelected) =>
+        setSelectedDevicesId((prevSelected) =>
             prevSelected.filter((id) => id !== selectedDevice)
         );
       }
@@ -185,7 +184,7 @@ const DevicesTable = ({ devices, isLoading }) => {
               TransitionComponent: Zoom
             });
           })
-          .catch(rejected => handleUpdateDeviceFailure("An error occured"));
+          .catch(() => handleUpdateDeviceFailure("An error occured"));
     }
     else if (devicesToDelete.length > 1){
       const patchOperation = [{
@@ -195,7 +194,6 @@ const DevicesTable = ({ devices, isLoading }) => {
       }];
       const body = devicesToDelete.reduce(
           (obj, item) => Object.assign(obj, { [item]: patchOperation }), {});
-      console.log(body);
 
       patchDevices(body).unwrap()
           .then((response)=>{
@@ -211,7 +209,7 @@ const DevicesTable = ({ devices, isLoading }) => {
               TransitionComponent: Zoom
             });
           })
-          .catch(rejected => handleUpdateDeviceFailure("An error occured"));
+          .catch(() => handleUpdateDeviceFailure("An error occured"));
 
     }
 
@@ -220,7 +218,7 @@ const DevicesTable = ({ devices, isLoading }) => {
 
   const handleBulkDelete = () => {
     if (selectedBulkActions)
-      setDevicesToDelete(selectedDevices);
+      setDevicesToDelete(selectedDevicesId);
       setOpenConfirmDelete(true);
   }
 
@@ -249,7 +247,7 @@ const DevicesTable = ({ devices, isLoading }) => {
   };
 
   const handleSelectAllDevices = (event) => {
-    setSelectedDevices(
+    setSelectedDevicesId(
       event.target.checked
         ? devices.map((device) => device.id)
         : []
@@ -257,26 +255,42 @@ const DevicesTable = ({ devices, isLoading }) => {
   };
 
   const handleSelectOneDevice = (event, deviceId) => {
-    if (!selectedDevices.includes(deviceId)) {
-      setSelectedDevices((prevSelected) => [
+    if (!selectedDevicesId.includes(deviceId)) {
+      setSelectedDevicesId((prevSelected) => [
         ...prevSelected,
         deviceId
       ]);
     } else {
-      setSelectedDevices((prevSelected) =>
+      setSelectedDevicesId((prevSelected) =>
         prevSelected.filter((id) => id !== deviceId)
       );
     }
   };
 
   const handleDeviceWatchValueChanged = (event, device) => {
-    const body = [{
+    const patchOperation = [{
       op: "replace",
       path: "/watch",
       value: event.target.checked
     }]
-    patchDevice({device, body}).unwrap()
-        .catch(rejected => handleUpdateDeviceFailure("An error occured"));
+    if(selectedDevicesId.length === 0 || !selectedDevicesId.includes(device.id)){
+
+      patchDevice({device, body: patchOperation}).unwrap()
+          .catch(() => handleUpdateDeviceFailure("An error occured"));
+    }
+    else {
+      const body = selectedDevicesId.reduce(
+          (obj, item) => Object.assign(obj, { [item]: patchOperation }), {});
+      patchDevices({body, selectedDevices}).unwrap()
+          .then((response)=>{
+            // Déclarer un message d'erreur si problème sur un des objets
+            if (response.some(x => !x.success))
+              handleUpdateDeviceFailure("An error occured");
+
+          })
+          .catch(() => handleUpdateDeviceFailure("An error occured"));
+    }
+
   }
 
   const handlePageChange = (event, newPage) => {
@@ -294,10 +308,10 @@ const DevicesTable = ({ devices, isLoading }) => {
     limit
   );
   const selectedSomeDevices =
-    selectedDevices.length > 0 &&
-    selectedDevices.length < devices.length;
+    selectedDevicesId.length > 0 &&
+    selectedDevicesId.length < devices.length;
   const selectedAllDevices =
-    selectedDevices.length === devices.length;
+    selectedDevicesId.length === devices.length;
   const theme = useTheme();
 
   const displayUtcDate = (date) => {
@@ -382,7 +396,7 @@ const DevicesTable = ({ devices, isLoading }) => {
               (
                     <TableBody>
                 {paginatedDevices.map((device) => {
-                  const isDeviceSelected = selectedDevices.includes(
+                  const isDeviceSelected = selectedDevicesId.includes(
                       device.id
                   );
                   return (
