@@ -44,6 +44,7 @@ const Statistics = Loader(
   lazy(() => import('src/content/dashboards/Statistics'))
 );
 const Tasks = Loader(lazy(() => import('src/content/dashboards/Tasks')));
+const Trash = Loader(lazy(()=> import('src/content/devices/Trash')))
 
 const devicesRoutes = [
   {
@@ -53,6 +54,10 @@ const devicesRoutes = [
   {
     path: '/create',
     element: <CreateForm/>
+  },
+  {
+    path: '/trash',
+    element: <Trash/>
   },
   {
     path: '/:id',

@@ -7,7 +7,7 @@ import { useGetAllDevicesQuery } from 'src/utils/api'
 
 function DevicesList() {
 
-  const { data, isError, isLoading, error } = useGetAllDevicesQuery();
+  const { data, isError, isLoading, error } = useGetAllDevicesQuery(undefined,{pollingInterval: 5000});
 
   return (
       <div className="App">

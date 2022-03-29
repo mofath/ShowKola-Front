@@ -168,7 +168,6 @@ const DevicesTable = ({ devices, isLoading }) => {
   };
 
   const handleDeleteCompleted = () => {
-
     if (devicesToDelete.length === 1){
       deleteOneDevice(devicesToDelete[0]).unwrap()
           .then(()=>{
@@ -195,11 +194,10 @@ const DevicesTable = ({ devices, isLoading }) => {
       const body = devicesToDelete.reduce(
           (obj, item) => Object.assign(obj, { [item]: patchOperation }), {});
 
-      patchDevices(body).unwrap()
+      patchDevices({body, selectedDevices}).unwrap()
           .then((response)=>{
             setOpenConfirmDelete(false);
             setDevicesToDelete([]);
-            console.log(response);
             enqueueSnackbar(t('Delete action completed successfully'), {
               variant: 'success',
               anchorOrigin: {
@@ -212,8 +210,6 @@ const DevicesTable = ({ devices, isLoading }) => {
           .catch(() => handleUpdateDeviceFailure("An error occured"));
 
     }
-
-
   };
 
   const handleBulkDelete = () => {

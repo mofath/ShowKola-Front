@@ -9,7 +9,7 @@ export const api = createApi({
     tagTypes: ['Device', 'selectedDevice','Models'],
     endpoints: (build) => ({
         getAllDevices: build.query({
-            query: () => `/api/device`,
+            query: (payload) => `/api/device${payload ? `?isDeleted=${payload.isDeleted}` : ''}`,
             providesTags: (result) =>
                 result
                     ? [...result.map(({ id }) => ({ type: 'Device', id })), 'Device']
@@ -22,6 +22,14 @@ export const api = createApi({
         getOneDevice: build.query({
             query : (id) => `/api/device/${id}`,
             providesTags: ['selectedDevice']
+        }),
+        deleteDevices: build.mutation({
+            query: (payload) => ({
+                url: `/api/device`,
+                method: 'DELETE',
+                body: payload,
+            }),
+            invalidatesTags: ['Device']
         }),
         deleteOneDevice: build.mutation({
             query: (deviceId) => ({
@@ -54,6 +62,7 @@ export const api = createApi({
             }),
             invalidatesTags: ['Device'],
             async onQueryStarted(payload,{dispatch, queryFulfilled}){
+                console.log(payload);
                 const {body, selectedDevices} = payload;
                 const {updateQueryData} = api.util;
                 const patchResult = dispatch(
@@ -101,6 +110,7 @@ export const api = createApi({
 
 export const { useGetAllDevicesQuery,
     useGetOneDeviceQuery,
+    useDeleteDevicesMutation,
     useDeleteOneDeviceMutation,
     useCreateDeviceMutation,
     useUpdateDeviceMutation,
