@@ -52,7 +52,9 @@ const createDeviceValidationSchema=
             vintSerial: Yup.string(),
         }),
         Yup.object().shape({
-            interval: Yup.number(),
+            interval: Yup.string()
+                .required('Interval required')
+                .matches('^\\d{2}:([0-5][0-9]):([0-5][0-9])$', 'format must be hh:mm:ss'),
         }),
 ];
 

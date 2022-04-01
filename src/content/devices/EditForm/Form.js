@@ -69,8 +69,8 @@ const jsonSchema = {
             format: "int32"
         },
         interval: {
-            type: "integer",
-            format: "int32"
+            type: "string",
+            nullable: true
         },
         watch: {
             type: "boolean"
@@ -116,6 +116,24 @@ const Form = ({data}) => {
 
 
 
+    const editDeviceValidationSchema=
+            Yup.object().shape({
+                host: Yup.string()
+                    .required('Host required')
+                    .matches('^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$','must be valid ip v4 address'),
+                port: Yup.number()
+                    .required('Port number required')
+                    .min(0, "Port must be between 0 and 65535")
+                    .max(65535, "Port must be between 0 and 65535"),
+                password: Yup.string()
+                    .nullable(),
+                vintSerial: Yup.string()
+                    .nullable(),
+                interval: Yup.string()
+                    .required('Interval required')
+                    .matches('^\\d{2}:([0-5][0-9]):([0-5][0-9])$', 'format must be hh:mm:ss'),
+            });
+
     const handleCreateInvoiceSuccess = () => {
         enqueueSnackbar(t('Device successfully updated'), {
             variant: 'success',
@@ -140,6 +158,7 @@ const Form = ({data}) => {
     return(
         <Formik
             initialValues={data}
+            validationSchema={editDeviceValidationSchema}
             onSubmit={async (
                 _values,
                 { resetForm, setErrors, setStatus, setSubmitting, errors }
@@ -259,14 +278,14 @@ const Form = ({data}) => {
                               </Grid>
                               <Grid item xs={12} md={6} lg={4}>
                                   <Box pb={1}>
-                                      <b>{t('Interval')}:</b>
+                                      <b>{t('Interval (hh:mm:ss)')}:</b>
                                   </Box>
                                   <TextField
                                       error={Boolean(touched.interval && errors.interval)}
                                       fullWidth
                                       helperText={touched.interval && errors.interval}
                                       name="interval"
-                                      placeholder={t('Fetching interval')}
+                                      placeholder={t('Fetching interval (hh:mm:ss)')}
                                       onBlur={handleBlur}
                                       onChange={handleChange}
                                       value={values.interval || undefined}
