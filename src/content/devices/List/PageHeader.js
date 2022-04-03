@@ -1,4 +1,3 @@
-import { useRef, useState } from 'react';
 import {
   Typography,
   Button,
@@ -9,10 +8,8 @@ import {
   styled
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import DocumentScannerTwoToneIcon from '@mui/icons-material/DocumentScannerTwoTone';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import KeyboardArrowDownTwoToneIcon from '@mui/icons-material/KeyboardArrowDownTwoTone';
-import AddAlertTwoToneIcon from '@mui/icons-material/AddAlertTwoTone';
+import Projector  from 'mdi-material-ui/Projector';
 import {useNavigate} from "react-router-dom";
 
 const AvatarPageTitle = styled(Avatar)(
@@ -44,30 +41,6 @@ function PageHeader() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-
-  const periods = [
-    {
-      value: 'today',
-      text: t('Today')
-    },
-    {
-      value: 'yesterday',
-      text: t('Yesterday')
-    },
-    {
-      value: 'last_month',
-      text: t('Last month')
-    },
-    {
-      value: 'last_year',
-      text: t('Last year')
-    }
-  ];
-
-  const [openPeriod, setOpenMenuPeriod] = useState(false);
-  const [period, setPeriod] = useState(periods[3].text);
-  const actionRef1 = useRef(null);
-
   return (
     <Box
       display="flex"
@@ -77,14 +50,11 @@ function PageHeader() {
     >
       <Box display="flex" alignItems="center">
         <AvatarPageTitle variant="rounded">
-          <AddAlertTwoToneIcon fontSize="large" />
+          <Projector fontSize="large" />
         </AvatarPageTitle>
         <Box>
           <Typography variant="h3" component="h3" gutterBottom>
             {t('Devices')}
-          </Typography>
-          <Typography variant="subtitle2">
-            {t('Custom dashboard built using the included components')}
           </Typography>
         </Box>
       </Box>

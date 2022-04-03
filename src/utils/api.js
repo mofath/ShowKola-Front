@@ -1,7 +1,7 @@
 import {applyPatch} from 'fast-json-patch';
 import {cloneDeep} from 'lodash';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import {RtkQueryConfig} from "../config";
+import {RtkQueryConfig} from "src/config";
 
 export const api = createApi({
     baseQuery: fetchBaseQuery(RtkQueryConfig),

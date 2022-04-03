@@ -106,7 +106,7 @@ const applyPagination = (devices, page, limit) => {
   return devices.slice(page * limit, page * limit + limit);
 };
 
-const DevicesTable = ({ devices, isLoading }) => {
+const Results = ({ devices, isLoading }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedDevicesId, setSelectedDevicesId] = useState([]);
@@ -581,12 +581,12 @@ const DevicesTable = ({ devices, isLoading }) => {
   );
 };
 
-DevicesTable.propTypes = {
+Results.propTypes = {
   devices: PropTypes.array.isRequired
 };
 
-DevicesTable.defaultProps = {
+Results.defaultProps = {
   devices: []
 };
 
-export default DevicesTable;
+export default Results;

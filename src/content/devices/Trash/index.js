@@ -44,7 +44,7 @@ function Trash() {
         direction="row"
         justifyContent="center"
         alignItems="stretch"
-        spacing={4}
+        spacing={1}
       >
         <Grid item xs={12}>
           <Results devices={data} isLoading={isLoading} isError={isError} initialError={initialError}/>

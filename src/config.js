@@ -31,3 +31,7 @@ export const axiosConfig = {
 export const RtkQueryConfig = {
   baseUrl: process.env.REACT_APP_API_BASEURL
 }
+
+export const appVersion = {
+  version: process.env.REACT_APP_VERSION
+}

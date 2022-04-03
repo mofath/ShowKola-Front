@@ -250,7 +250,7 @@ const router = [
     children: [
       {
         path: '/',
-        element: <Navigate to="dashboards" replace />
+        element: <Navigate to="devices" replace />
       },
       {
         path: 'devices',

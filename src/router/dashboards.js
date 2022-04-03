@@ -18,7 +18,7 @@ const Automation = Loader(
 const Analytics = Loader(
   lazy(() => import('src/content/dashboards/Analytics'))
 );
-const Devices = Loader(lazy(() => import('src/content/dashboards/Devices')))
+const Devices = Loader(lazy(() => import('src/content/devices/List')))
 const Reports = Loader(lazy(() => import('src/content/dashboards/Reports')));
 const Banking = Loader(lazy(() => import('src/content/dashboards/Banking')));
 const Commerce = Loader(lazy(() => import('src/content/dashboards/Commerce')));

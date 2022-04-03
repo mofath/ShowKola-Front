@@ -41,6 +41,7 @@
     "i18next": "21.5.2",
     "i18next-browser-languagedetector": "6.1.2",
     "jsonwebtoken": "8.5.1",
+    "mdi-material-ui": "^7.2.0",
     "moment": "^2.29.1",
     "notistack": "2.0.3",
     "nprogress": "0.2.0",

@@ -3,14 +3,14 @@ import Scrollbar from 'src/components/Scrollbar';
 import { SidebarContext } from 'src/contexts/SidebarContext';
 
 import {
-  Box,
-  Drawer,
-  alpha,
-  styled,
-  Divider,
-  useTheme,
-  lighten,
-  darken
+    Box,
+    Drawer,
+    alpha,
+    styled,
+    Divider,
+    useTheme,
+    lighten,
+    darken, Typography, Grid
 } from '@mui/material';
 import Logo from 'src/components/LogoSign';
 import SidebarTopSection from './SidebarTopSection';
@@ -54,24 +54,25 @@ function Sidebar() {
         }}
       >
         <Scrollbar>
-          <Box mt={3}>
-            <Box
-              mx={2}
-              sx={{
-                width: 52
-              }}
-            >
-              <Logo />
-            </Box>
-          </Box>
-          <Divider
-            sx={{
-              my: theme.spacing(3),
-              mx: theme.spacing(2),
-              background: theme.colors.alpha.trueWhite[10]
-            }}
-          />
-          <SidebarTopSection />
+            <Grid container mt={3}>
+                <Grid
+                    item
+                    mx={2}
+                    sx={{
+                        width: 52
+                    }}
+                >
+                    <Logo />
+                </Grid>
+                <Grid item>
+                    <Typography variant="h3" mx={1}>
+                        ShowKola
+                    </Typography>
+                </Grid>
+
+
+
+            </Grid>
           <Divider
             sx={{
               my: theme.spacing(3),

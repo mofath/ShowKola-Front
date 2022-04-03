@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import {appVersion} from 'src/config'
 
 const LogoWrapper = styled(Link)(
   ({ theme }) => `
@@ -77,6 +78,8 @@ const LogoSignInner = styled(Box)(
 `
 );
 
+console.log(appVersion);
+
 const TooltipWrapper = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
@@ -99,8 +102,8 @@ function Logo() {
   const theme = useTheme();
 
   return (
-    <TooltipWrapper title={t('Tokyo React Javascript Admin Dashboard')} arrow>
-      <LogoWrapper to="/overview">
+    <TooltipWrapper title={t('ShowKola Administration Dashboard')} arrow>
+      <LogoWrapper to="/">
         <Badge
           sx={{
             '.MuiBadge-badge': {
@@ -111,7 +114,7 @@ function Logo() {
           }}
           overlap="circular"
           color="success"
-          badgeContent="3.0"
+          badgeContent={appVersion.version}
         >
           <LogoSignWrapper>
             <LogoSign>
