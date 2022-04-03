@@ -1,21 +1,19 @@
 import Footer from 'src/components/Footer';
 import PageTitleWrapper from 'src/components/PageTitleWrapper';
 import { Helmet } from 'react-helmet-async';
-
-import {Card, Grid} from '@mui/material';
-
-import PageHeader from './PageHeader';
-import {useGetAllDevicesQuery} from "../../../utils/api";
+import {useGetAllDevicesQuery} from "src/utils/api";
 import Results from "./Results";
+import PageHeader from './PageHeader';
 
-const DashboardReports = () => {
+
+const DevicesList = () => {
 
   const { data, isError, isLoading, error } = useGetAllDevicesQuery(undefined,{pollingInterval: 5000});
 
   return (
     <>
       <Helmet>
-        <title>Devices Dashboard</title>
+        <title>Devices</title>
       </Helmet>
       <PageTitleWrapper>
         <PageHeader />
@@ -32,4 +30,4 @@ const DashboardReports = () => {
   );
 }
 
-export default DashboardReports;
+export default DevicesList;
